@@ -1,0 +1,705 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>UP Board Marks Calculator | Class 10 & 12</title>
+  <meta name="description" content="Calculate your UP Board Class 10 and Class 12 percentage, total marks, average, and pass/fail status accurately and instantly." />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* -------------------------------------------------------------
+       CSS VARIABLES & THEME SETUP
+       ------------------------------------------------------------- */
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --secondary: #06b6d4;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --card-border: rgba(255, 255, 255, 0.16);
+      --card-hover-border: rgba(255, 255, 255, 0.35);
+      
+      --input-bg: rgba(255, 255, 255, 0.06);
+      --input-border: rgba(255, 255, 255, 0.2);
+      --input-focus: #818cf8;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --radius-full: 9999px;
+      
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 20px 30px -10px rgba(0, 0, 0, 0.4);
+      --glass-blur: blur(16px);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* -------------------------------------------------------------
+       GLOBAL RESET & BASE STYLES
+       ------------------------------------------------------------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Background Ambient Glows */
+    .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.45;
+    }
+    .glow-1 {
+      top: -100px;
+      left: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, #6366f1, transparent);
+    }
+    .glow-2 {
+      bottom: -150px;
+      right: -150px;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, #ec4899, transparent);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    /* -------------------------------------------------------------
+       HEADER & LOGO
+       ------------------------------------------------------------- */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.9rem;
+      border-radius: var(--radius-full);
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #a5b4fc;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.85rem;
+    }
+
+    .main-title {
+      font-size: clamp(2rem, 5vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.6rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* -------------------------------------------------------------
+       VIEWS (TAB MANAGEMENT)
+       ------------------------------------------------------------- */
+    .view-section {
+      display: none;
+      animation: fadeIn 0.35s ease forwards;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* -------------------------------------------------------------
+       HOME VIEW: CLASS SELECTION CARDS
+       ------------------------------------------------------------- */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .select-card {
+      position: relative;
+      background: var(--card-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 1.75rem;
+      text-align: left;
+      cursor: pointer;
+      overflow: hidden;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .select-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #6366f1, #06b6d4);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .select-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--card-hover-border);
+      box-shadow: var(--shadow-lg);
+      background: rgba(255, 255, 255, 0.11);
+    }
+
+    .select-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon {
+      font-size: 2.75rem;
+      width: 68px;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .card-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .card-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #818cf8;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    /* -------------------------------------------------------------
+       CALCULATOR CONTAINER & INPUT GRIDS
+       ------------------------------------------------------------- */
+    .calculator-wrapper {
+      background: var(--card-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .calc-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 1rem;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 0.55rem 1.1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .calc-heading {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .max-tag {
+      color: var(--text-dim);
+      font-size: 0.78rem;
+    }
+
+    .input-field-wrapper {
+      position: relative;
+    }
+
+    .marks-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      outline: none;
+      transition: var(--transition);
+      -moz-appearance: textfield;
+    }
+
+    .marks-input::-webkit-outer-spin-button,
+    .marks-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .marks-input:focus {
+      border-color: var(--input-focus);
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
+    }
+
+    .marks-input.error {
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .error-msg {
+      font-size: 0.75rem;
+      color: #f87171;
+      min-height: 1.1rem;
+      margin-top: 0.15rem;
+    }
+
+    /* -------------------------------------------------------------
+       ACTION BUTTONS
+       ------------------------------------------------------------- */
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.85rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: var(--transition);
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* -------------------------------------------------------------
+       RESULT CARD
+       ------------------------------------------------------------- */
+    .result-wrapper {
+      margin-top: 2rem;
+      display: none;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .result-card {
+      background: linear-gradient(145deg, rgba(30, 27, 75, 0.9), rgba(15, 23, 42, 0.95));
+      border: 2px solid rgba(129, 140, 248, 0.4);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 1rem;
+    }
+
+    .result-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+
+    .status-badge {
+      padding: 0.35rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .status-pass {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--success);
+      color: #34d399;
+    }
+
+    .status-fail {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid var(--danger);
+      color: #f87171;
+    }
+
+    .percentage-display {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .percentage-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.25rem;
+    }
+
+    .percentage-number {
+      font-size: clamp(2.75rem, 8vw, 4.25rem);
+      font-weight: 800;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .metric-item {
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* -------------------------------------------------------------
+       HOW TO CALCULATE SECTION
+       ------------------------------------------------------------- */
+    .info-section {
+      margin-top: 3rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+
+    .info-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .formula-card {
+      background: rgba(0, 0, 0, 0.25);
+      border-left: 3px solid var(--primary);
+      padding: 0.85rem 1.1rem;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 0.75rem 0;
+      font-family: monospace;
+      font-size: 0.95rem;
+      color: #93c5fd;
+    }
+
+    .info-text {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* -------------------------------------------------------------
+       FOOTER
+       ------------------------------------------------------------- */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 1.75rem 1rem;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: var(--glass-blur);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      margin-top: auto;
+    }
+
+    .footer-content {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .creator-highlight {
+      font-weight: 700;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    /* -------------------------------------------------------------
+       RESPONSIVE REFINEMENTS
+       ------------------------------------------------------------- */
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.5rem 1rem 3rem;
+      }
+      .calculator-wrapper {
+        padding: 1.25rem;
+      }
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .button-group {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Light Graphics -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="container">
+    
+    <!-- Header Section -->
+    <header>
+      <div class="badge">Uttar Pradesh Board (UPMSP)</div>
+      <h1 class="main-title">UP Board Marks Calculator</h1>
+      <p class="subtitle">Calculate your Class 10 & Class 12 UP Board percentage instantly</p>
+    </header>
+
+    <!-- VIEW 1: HOME SCREEN -->
+    <main id="home-view" class="view-section active">
+      <div class="cards-grid">
+        
+        <!-- Class 10 Card -->
+        <div class="select-card" onclick="openCalculator('10')">
+          <div class="card-icon">🎓</div>
+          <div>
+            <h2 class="card-title">CLASS 10 (High School)</h2>
+            <p class="card-desc">Calculate percentage for 6 subjects: Hindi, English, Maths, Science, Social Science & Drawing.</p>
+          </div>
+          <div class="card-meta">
+            <span>6 Subjects • Total 600 Marks</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Class 12 Card -->
+        <div class="select-card" onclick="openCalculator('12')">
+          <div class="card-icon">📚</div>
+          <div>
+            <h2 class="card-title">CLASS 12 (Intermediate)</h2>
+            <p class="card-desc">Calculate percentage for 5 subjects: Physics, Chemistry, Maths, Hindi & English.</p>
+          </div>
+          <div class="card-meta">
+            <span>5 Subjects • Total 500 Marks</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Informational Section -->
+      <section class="info-section">
+        <h3 class="info-title">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          How to Calculate UP Board Percentage
+        </h3>
+        <p class="info-text">
+          UP Board calculates scores based on each subject carrying a maximum of 100 marks (including theory and practical/internal assessment components).
+        </p>
+        <div class="formula-card">
+          Percentage (%) = (Total Marks Obtained / Maximum Marks) × 100
+        </div>
+        <p class="info-text">
+          Passing Criteria: A student is required to secure at least <strong>33%</strong> marks in each subject to pass the examination.
+        </p>
+      </section>
+    </main>
+
+    <!-- VIEW 2: CLASS 10 CALCULATOR -->
+    <section id="class-10-view" class="view-section">
+      <div class="calculator-wrapper">
+        <div class="calc-nav">
+          <button class="back-btn" onclick="showHome()">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Home
+          </button>
+          <span class="calc-heading">Class 10 Calculator</span>
+        </div>
+
+        <form id="form-10" onsubmit="event.preventDefault(); calculateMarks(10);"
